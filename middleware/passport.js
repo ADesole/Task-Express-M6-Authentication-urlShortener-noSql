@@ -8,9 +8,9 @@ exports.localStrategy = new LocalStrategy(async (username, password, done) => {
     const foundUser = await User.findOne({ username });
     let passwordsMatch;
     if (foundUser) {
-      passwordsMatch = bcrypt.compareSync(foundUser.password, password);
-      console.log(foundUser.password);
-      console.log(password);
+      passwordsMatch = bcrypt.compareSync(password, foundUser.password);
+      //   console.log(foundUser.password);
+      //   console.log(password);
       console.log(passwordsMatch);
 
       if (passwordsMatch) return done(null, foundUser);
