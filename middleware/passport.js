@@ -1,7 +1,10 @@
 const User = require("../models/User.js");
 const bcrypt = require("bcrypt");
+const ExtractJwt = require("passport-jwt").ExtractJwt;
+const { JWT_SECRET } = require("../config/keys.js");
 const salt = 10;
 const LocalStrategy = require("passport-local").Strategy;
+const JWTStrategy = require("passport-jwt").Strategy;
 
 exports.localStrategy = new LocalStrategy(async (username, password, done) => {
   try {
@@ -22,3 +25,21 @@ exports.localStrategy = new LocalStrategy(async (username, password, done) => {
     done(error);
   }
 });
+
+exports.jwtStrategy = new JWTStrategy(
+  {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: JWT_SECRET,
+  },
+  async (jwtPayload, done) => {
+    if (Date.now() > jwtPayload.exp) {
+      return done(null, false);
+    }
+    try {
+      const user = await User.findById(jwtPayload.id);
+      done(null, user);
+    } catch (err) {
+      done(err);
+    }
+  }
+);
